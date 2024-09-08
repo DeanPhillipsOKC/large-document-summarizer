@@ -4,10 +4,9 @@ from langchain_openai import ChatOpenAI
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_experimental.text_splitter import SemanticChunker
 import pandas as pd
-import numpy as np
-import faiss
 from llm import FlowingSummaryNarrativeCreator
 from llm import FinalSummaryNarrativeCreator
+from vector import DocumentSimilarityClusterer
 
 class LargeDocumentSummarizerApp:
     def main(self):
@@ -28,27 +27,10 @@ class LargeDocumentSummarizerApp:
 
             embeddings = embedding_function.embed_documents([doc.page_content for doc in docs])
 
-            vectors = embeddings
-            array = np.array(vectors).astype("float32")
-            
-            num_chunks = len(docs)
-            num_clusters = num_chunks / 2
-
-            dimension = array.shape[1]
-            kmeans = faiss.Kmeans(dimension, num_clusters, niter=20, verbose=True)
-            kmeans.train(array)
-            centroids = kmeans.centroids
-            index = faiss.IndexFlatL2(dimension)
-            index.add(array)
-
-            D, I = index.search(centroids, 1)
-
-            sorted_array = np.sort(I, axis=0)
-            sorted_array=sorted_array.flatten()
-            extracted_docs = [docs[i] for i in sorted_array]
+            clustered_docs = DocumentSimilarityClusterer.cluster_documents(docs, embeddings)
 
             flowing_summary_narrative_creator = FlowingSummaryNarrativeCreator()
-            result = flowing_summary_narrative_creator.create_summary(extracted_docs)
+            result = flowing_summary_narrative_creator.create_summary(clustered_docs)
             summary = result["summary"]
             total_tokens = result["total_tokens_sent"]
 
