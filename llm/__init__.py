@@ -1,3 +1,4 @@
 from llm.flowing_summary_narrative_creator import FlowingSummaryNarrativeCreator
+from llm.final_summary_narrative_creator import FinalSummaryNarrativeCreator
 
-__all__ = ["FlowingSummaryNarrativeCreator"]
+__all__ = ["FlowingSummaryNarrativeCreator", "FinalSummaryNarrativeCreator"]

@@ -6,9 +6,8 @@ from langchain_experimental.text_splitter import SemanticChunker
 import pandas as pd
 import numpy as np
 import faiss
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
 from llm import FlowingSummaryNarrativeCreator
+from llm import FinalSummaryNarrativeCreator
 
 class LargeDocumentSummarizerApp:
     def main(self):
@@ -61,21 +60,8 @@ class LargeDocumentSummarizerApp:
             summary = result["summary"]
             total_tokens = result["total_tokens_sent"]
 
-            premium_model = ChatOpenAI(temperature=0, model="gpt-4o")
-            finalizer_prompt = ChatPromptTemplate.from_template(""" 
-                You are a professional editor and writer. You will be given a summary of a book. Your task is to refine the summary, make it more detailed,
-                compelling, and less redundant.
-                                                                
-                Passage:
-                                                                
-                {text}
-                                                                
-                SUMMARY:
-            """)
-
-            final_chain = finalizer_prompt | premium_model | StrOutputParser()
-
-            final_summary = final_chain.invoke({"text": summary})
+            final_summary_narrative_creator = FinalSummaryNarrativeCreator()
+            final_summary = final_summary_narrative_creator.create_summary({"text": summary})
 
             stats = [
                 ['Tokens in original document', num_tokens_in_original],
