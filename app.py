@@ -12,6 +12,11 @@ class LargeDocumentSummarizerApp:
     def main(self):
         st.title("Large Document Summarizer")
         url = st.text_input("Enter the URL of the document")
+        cluster_multiplier = st.slider(
+            "Cluster multiplier", min_value= 0.1, max_value=1.0, value=0.5, step=0.05, 
+            help="The number of clusters used will be equal to the number of chunks in the semantically parsed document, times this value."
+        )
+        st.latex(f"k=\lfloor {cluster_multiplier}n \\rfloor")
         summarize_button = st.button("Summarize")
 
         if summarize_button:
@@ -27,7 +32,7 @@ class LargeDocumentSummarizerApp:
 
             embeddings = embedding_function.embed_documents([doc.page_content for doc in docs])
 
-            clustered_docs = DocumentSimilarityClusterer.cluster_documents(docs, embeddings)
+            clustered_docs = DocumentSimilarityClusterer.cluster_documents(docs, embeddings, cluster_multiplier)
 
             flowing_summary_narrative_creator = FlowingSummaryNarrativeCreator()
             result = flowing_summary_narrative_creator.create_summary(clustered_docs)
