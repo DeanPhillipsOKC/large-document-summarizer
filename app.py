@@ -28,18 +28,10 @@ class LargeDocumentSummarizerApp:
 
             embeddings = embedding_function.embed_documents([doc.page_content for doc in docs])
 
-            content_list = [doc.page_content for doc in docs]
-            df = pd.DataFrame(content_list, columns=['page_content'])
-
-            vectors = [embedding for embedding in embeddings]
-            array = np.array(vectors)
-            embeddings_series = pd.Series(list(array))
-            df['embeddings'] = embeddings_series
+            vectors = embeddings
+            array = np.array(vectors).astype("float32")
             
-            array = array.astype('float32') 
             num_chunks = len(docs)
-
-            # num_clusters = min(50, num_chunks)
             num_clusters = num_chunks / 2
 
             dimension = array.shape[1]
