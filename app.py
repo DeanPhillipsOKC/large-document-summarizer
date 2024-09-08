@@ -8,7 +8,7 @@ import numpy as np
 import faiss
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from tqdm import tqdm
+from llm import FlowingSummaryNarrativeCreator
 
 class LargeDocumentSummarizerApp:
     def main(self):
@@ -56,33 +56,10 @@ class LargeDocumentSummarizerApp:
             sorted_array=sorted_array.flatten()
             extracted_docs = [docs[i] for i in sorted_array]
 
-            prompt = ChatPromptTemplate.from_template("""
-                You will be given different passages from a book one by one. Provide a summary of the following text. Your result must be detailed and 
-                atleast 2 paragraphs. When summarizing, directly dive into the narrative or descriptions from the text without using introductory 
-                phrases like 'In this passage'. Directly address the main events, characters, and themes, encapsulating the essence and significant 
-                details from the text in a flowing narrative. The goal is to present a unified view of the content, continuing the story seamlessly as 
-                if the passage naturally progresses into the summary
-
-                Passage:
-
-                ```{text}```
-                SUMMARY:
-                """
-            )
-
-            chain= (
-                prompt | model | StrOutputParser() )
-            
-            summary = ""
-
-            total_tokens = 0
-
-            for doc in tqdm(extracted_docs, desc="Processing documents"):
-                # Get the new summary.
-                total_tokens = total_tokens + model.get_num_tokens(doc.page_content)
-                new_summary = chain.invoke({"text": doc.page_content})
-                # Update the list of the last two summaries: remove the first one and add the new one at the end.
-                summary+=new_summary
+            flowing_summary_narrative_creator = FlowingSummaryNarrativeCreator()
+            result = flowing_summary_narrative_creator.create_summary(extracted_docs)
+            summary = result["summary"]
+            total_tokens = result["total_tokens_sent"]
 
             premium_model = ChatOpenAI(temperature=0, model="gpt-4o")
             finalizer_prompt = ChatPromptTemplate.from_template(""" 
