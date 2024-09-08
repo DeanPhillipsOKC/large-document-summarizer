@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 
 class FlowingSummaryNarrativeCreator:
@@ -17,18 +17,16 @@ class FlowingSummaryNarrativeCreator:
         return StrOutputParser()
     
     def _create_prompt_template(self):
-        return ChatPromptTemplate.from_template("""
-            You will be given different passages from a book one by one. Provide a summary of the following text. Your result must be detailed and 
-            atleast 2 paragraphs. When summarizing, directly dive into the narrative or descriptions from the text without using introductory 
-            phrases like 'In this passage'. Directly address the main events, characters, and themes, encapsulating the essence and significant 
-            details from the text in a flowing narrative. The goal is to present a unified view of the content, continuing the story seamlessly as 
-            if the passage naturally progresses into the summary
-
-            Passage:
-
-            ```{text}```
-            SUMMARY:
-            """
+        return ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(
+                    """You are a highly skilled assistant that excels in summarizing text. Your goal is to create a coherent and detailed summary of a given passage,
+                    focusing on the main events, characters, and themes. Your summary should flow seamlessly, as if the passage naturally progresses into the summary.
+                    Avoid using introductory phrases like 'In this passage' and directly address the narrative or descriptions from the text.
+                    Your result must be detailed and at least 2 paragraphs long."""
+                ),
+                HumanMessagePromptTemplate.from_template("Passage:\n{text}")
+            ]
         )
     
     def _create_chain(self):

@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 
 
 class FinalSummaryNarrativeCreator:
@@ -17,16 +17,14 @@ class FinalSummaryNarrativeCreator:
         return StrOutputParser()
     
     def _create_prompt_template(self):
-        return ChatPromptTemplate.from_template(""" 
+        return ChatPromptTemplate.from_messages(
+            [
+                SystemMessagePromptTemplate.from_template(""" 
                 You are a professional editor and writer. You will be given a summary of a book. Your task is to refine the summary, make it more detailed,
-                compelling, and less redundant.
-                                                                
-                Passage:
-                                                                
-                {text}
-                                                                
-                SUMMARY:
-            """)
+                compelling, and less redundant."""),
+                HumanMessagePromptTemplate.from_template("Passage: {text}")
+            ]
+        )
     
     def _create_chain(self):
         return self.prompt_template | self.llm | self.output_parser
