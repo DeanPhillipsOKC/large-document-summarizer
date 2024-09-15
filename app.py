@@ -11,6 +11,10 @@ class LargeDocumentSummarizerApp:
     def main(self):
         st.title("Large Document Summarizer")
         url = st.text_input("Enter the URL of the document")
+        file = st.file_uploader("upload file")
+        html = None
+        if file:
+            html = file.getvalue()
         load_button = st.button("Load document", use_container_width=True)
 
         if load_button:
@@ -19,7 +23,7 @@ class LargeDocumentSummarizerApp:
         if "document_loaded" in st.session_state.keys() and st.session_state["document_loaded"]:
             model = ChatOpenAI()
 
-            doc_contents = WebDocumentRetriever.retrieve(url)
+            doc_contents = WebDocumentRetriever.retrieve(url, html)
             num_tokens_in_original = model.get_num_tokens(doc_contents)
 
             docs = DocumentChunker.chunk_document(doc_contents)
