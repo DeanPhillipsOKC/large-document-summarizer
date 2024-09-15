@@ -30,11 +30,14 @@ class LargeDocumentSummarizerApp:
 
             st.write(f"Number of chunks (n): {len(docs)}")
 
-            cluster_multiplier = st.slider(
-                "Cluster multiplier (k)", min_value= 0.01, max_value=1.0, value=0.5, step=0.01, 
-                help="The number of clusters used will be equal to the number of chunks in the semantically parsed document, times this value."
-            )
-            st.latex(f"k=\lfloor {cluster_multiplier}n \\rfloor = {int(len(docs) * cluster_multiplier)}")
+            use_clustering = st.checkbox("Use clustering", value=True)
+
+            if use_clustering:
+                cluster_multiplier = st.slider(
+                    "Cluster multiplier (k)", min_value= 0.01, max_value=1.0, value=0.5, step=0.01, 
+                    help="The number of clusters used will be equal to the number of chunks in the semantically parsed document, times this value."
+                )
+                st.latex(f"k=\lfloor {cluster_multiplier}n \\rfloor = {int(len(docs) * cluster_multiplier)}")
             
             llm_processing_method = st.radio(
                 "LLM processing method",
@@ -48,12 +51,15 @@ class LargeDocumentSummarizerApp:
 
                 progress_bar = st.progress(0)
 
-                embedding_function = OpenAIEmbeddings(model="text-embedding-3-small")
-                progress_bar.progress(30, text="Converting chunks into vectors.")
-                embeddings = embedding_function.embed_documents([doc.page_content for doc in docs])
+                if use_clustering:
+                    embedding_function = OpenAIEmbeddings(model="text-embedding-3-small")
+                    progress_bar.progress(30, text="Converting chunks into vectors.")
+                    embeddings = embedding_function.embed_documents([doc.page_content for doc in docs])
 
-                progress_bar.progress(50, text="Clustering the document vectors using a k-means algorithm.")
-                clustered_docs = DocumentSimilarityClusterer.cluster_documents(docs, embeddings, cluster_multiplier)
+                    progress_bar.progress(50, text="Clustering the document vectors using a k-means algorithm.")
+                    clustered_docs = DocumentSimilarityClusterer.cluster_documents(docs, embeddings, cluster_multiplier)
+                else:
+                    clustered_docs = docs
 
                 summary = ""
                 final_summary = ""
