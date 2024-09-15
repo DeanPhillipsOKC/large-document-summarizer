@@ -11,7 +11,7 @@ class FinalSummaryNarrativeCreator:
         self.chain = self._create_chain()
 
     def _create_llm(self):
-        return ChatOpenAI()
+        return ChatOpenAI(model="gpt-4o")
     
     def _create_output_parser(self):
         return StrOutputParser()
@@ -20,9 +20,9 @@ class FinalSummaryNarrativeCreator:
         return ChatPromptTemplate.from_messages(
             [
                 SystemMessagePromptTemplate.from_template(""" 
-                You are a professional editor and writer. You will be given a summary of a book. Your task is to refine the summary, make it more detailed,
-                compelling, and less redundant.  Do not worry about spoilers.  All important plot and thematic elements need to be captured.  Think of it
-                as a more efficient way of consuming the text than an actual summary."""),
+                You are a professional editor and writer. You will be given a passage that was written in chunks.  Your job is to not
+                necessarily make it shorter, but to make it flow better and to make sure that the information is not repeated.  You should also use
+                markdown format to add headers and emphasis to make the passage easier to read."""),
                 HumanMessagePromptTemplate.from_template("Passage:\n\n{text}Format Instructions: Use markdown format")
             ]
         )

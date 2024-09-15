@@ -1,8 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
+import streamlit as st
 
 class WebDocumentRetriever:
     @staticmethod
+    @st.cache_data()
     def retrieve(url):
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
