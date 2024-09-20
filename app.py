@@ -13,6 +13,7 @@ class LargeDocumentSummarizerApp:
         url = st.text_input("Enter the URL of the document")
         file = st.file_uploader("upload file")
         html = None
+
         if file:
             html = file.getvalue()
         load_button = st.button("Load document", use_container_width=True)
@@ -74,6 +75,9 @@ class LargeDocumentSummarizerApp:
                     print(summary)
                     total_tokens = result["total_tokens_sent"]
 
+                    with st.expander("Original summary"):
+                        st.markdown(summary)
+
                     final_summary_narrative_creator = FinalSummaryNarrativeCreator()
                     progress_bar.progress(80, text="Creating a final summary of the document")
                     final_summary = final_summary_narrative_creator.create_summary(summary)
@@ -88,7 +92,8 @@ class LargeDocumentSummarizerApp:
                 stats_df = pd.DataFrame(stats, columns=['Stat', 'Value'])
                 st.table(stats_df)
 
-                st.markdown(final_summary)
+                with st.expander("Compressed summary"):
+                    st.markdown(final_summary)
 
 if __name__ == "__main__":
     app = LargeDocumentSummarizerApp()

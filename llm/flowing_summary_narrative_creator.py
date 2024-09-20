@@ -1,7 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
-
+import streamlit as st
 
 class FlowingSummaryNarrativeCreator:
     def __init__(self):
@@ -35,6 +35,7 @@ class FlowingSummaryNarrativeCreator:
     def _get_num_tokens(self, doc):
         return self.llm.get_num_tokens(doc.page_content)
 
+    st.cache_data()
     def create_summary(self, docs):
         total_tokens = 0
         summary = ""
